@@ -25,7 +25,6 @@ import yaml
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
 
-from torchlight import DictAction
 
 
 import resource
@@ -57,6 +56,21 @@ def str2bool(v):
     else:
         raise argparse.ArgumentTypeError('Unsupported value encountered.')
 
+
+
+class DictAction(argparse.Action):
+    def __init__(self, option_strings, dest, nargs=None, **kwargs):
+        if nargs is not None:
+            raise ValueError("DictAction does not accept nargs")
+        super().__init__(option_strings, dest, **kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        parsed = eval(f"dict({values})")
+        current = getattr(namespace, self.dest, None)
+        if current is None:
+            current = {}
+        current.update(parsed)
+        setattr(namespace, self.dest, current)
 
 def get_parser():
     # parameter priority: command line > config > default
@@ -561,7 +575,7 @@ if __name__ == '__main__':
     p = parser.parse_args()
     if p.config is not None:
         with open(p.config, 'r') as f:
-            default_arg = yaml.load(f)
+            default_arg = yaml.safe_load(f)
         key = vars(p).keys()
         for k in default_arg.keys():
             if k not in key:
