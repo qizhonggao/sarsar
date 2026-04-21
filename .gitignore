@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+*.bak
+
+data/ntu/
+data/nturgbd_raw/
+work_dir/
+demo/
